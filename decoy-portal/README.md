@@ -32,3 +32,5 @@ If you modify this page, do not add credential logging. Collecting classmates' r
 A back button returns to the login so the next student gets a clean page.
 
 ## Files
+
+- [`index.html`](index.html) — the entire thing, 34 KB
