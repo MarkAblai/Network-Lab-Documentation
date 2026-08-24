@@ -179,5 +179,6 @@ Budget roughly 20 to 30 minutes for 20 switches including verification.
 
 ## Related
 
-- [Cisco 1100 Router: Reset Button Recovery](./cisco-1100-reset-button-recovery.md)
-- [Cisco 1100 Router: Password Recovery via ROMmon](./cisco-1100-password-recovery.md)
+- [Cisco 1100 Router: Reset Button Recovery](../Cisco-1100-Router/reset-button-recovery.md)
+- [Cisco 1100 Router: Password Recovery via ROMmon](../Cisco-1100-Router/password-recovery.md)
+- [Repository index](../README.md)
