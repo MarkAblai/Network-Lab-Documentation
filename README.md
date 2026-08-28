@@ -36,9 +36,3 @@ The Reset button on the Cisco 1100 ISR does **not** perform a configuration rese
 - **Switch (Catalyst 1200, web UI)** → use [`factory-reset.md`](Cisco-1200-Switch/factory-reset.md)
 
 [`reset-button-recovery.md`](Cisco-1100-Router/reset-button-recovery.md) documents the router button behavior specifically so nobody loses time retrying it expecting a wipe.
-
-
-
-## Contributing
-
-If you verify a procedure on hardware or firmware not yet covered, or find that one of these has stopped working after a firmware update, open a pull request following the existing format: state the exact hardware/firmware tested, include real command output, and note anything that looked like a failure but wasn't.
