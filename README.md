@@ -37,11 +37,7 @@ The Reset button on the Cisco 1100 ISR does **not** perform a configuration rese
 
 [`reset-button-recovery.md`](Cisco-1100-Router/reset-button-recovery.md) documents the router button behavior specifically so nobody loses time retrying it expecting a wipe.
 
-## Scope and disclaimer
 
-These procedures assume direct physical access to lab-owned hardware you are authorized to administer. They are written for a teaching lab context (semester turnover, shared student accounts, no production traffic) and are not vetted for production or customer-facing equipment. Config register and password-recovery steps in particular can lock you out or brick a misconfigured device if followed on the wrong platform — check the device and firmware version against what each guide states it was verified on before running anything.
-
-The `decoy-portal/` project is a separate, self-contained classroom exercise (a static page with no backend, no credential capture, and no network calls) and carries its own disclaimer in its README; it is unrelated to the recovery procedures above.
 
 ## Contributing
 
