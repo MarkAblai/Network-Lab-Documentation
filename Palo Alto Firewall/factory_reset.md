@@ -218,4 +218,6 @@ If you have admin credentials on even some of the units, do those first with `re
 
 - [Fortinet FortiGate: Factory Reset](../Fortinet-Firewall/factory-reset.md)
 - [Cisco 1100 Router: Password Recovery via ROMmon](../Cisco-1100-Router/password-recovery.md)
+- [Cisco 1100 Router: Reset Button Behavior](../Cisco-1100-Router/reset-button-recovery.md)
 - [Cisco Catalyst 1200 Switch: Factory Reset](../Cisco-1200-Switch/factory-reset.md)
+- [Repository index](../README.md)
