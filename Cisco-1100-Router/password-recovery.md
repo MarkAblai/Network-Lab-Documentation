@@ -375,3 +375,6 @@ Be aware that `factory-reset all secure` erases the boot image and can take hour
 
 - [Cisco 1100 Router: Reset Button Behavior](./reset-button-recovery.md)
 - [Cisco Catalyst 1200 Switch: Factory Reset](../Cisco-1200-Switch/factory-reset.md)
+- [Palo Alto Networks Firewall: Factory Reset](../Palo-Alto-Firewall/factory-reset.md)
+- [Fortinet FortiGate: Factory Reset](../Fortinet-Firewall/factory-reset.md)
+- [Repository index](../README.md)
