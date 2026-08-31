@@ -179,6 +179,8 @@ Budget roughly 20 to 30 minutes for 20 switches including verification.
 
 ## Related
 
-- [Cisco 1100 Router: Reset Button Recovery](../Cisco-1100-Router/reset-button-recovery.md)
 - [Cisco 1100 Router: Password Recovery via ROMmon](../Cisco-1100-Router/password-recovery.md)
+- [Cisco 1100 Router: Reset Button Behavior](../Cisco-1100-Router/reset-button-recovery.md)
+- [Palo Alto Networks Firewall: Factory Reset](../Palo-Alto-Firewall/factory-reset.md)
+- [Fortinet FortiGate: Factory Reset](../Fortinet-Firewall/factory-reset.md)
 - [Repository index](../README.md)
