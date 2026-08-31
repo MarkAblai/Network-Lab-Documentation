@@ -133,3 +133,6 @@ About 13 to 16 minutes per router.
 
 - [Cisco 1100 Router: Password Recovery via ROMmon](./password-recovery.md)
 - [Cisco Catalyst 1200 Switch: Factory Reset](../Cisco-1200-Switch/factory-reset.md)
+- [Palo Alto Networks Firewall: Factory Reset](../Palo-Alto-Firewall/factory-reset.md)
+- [Fortinet FortiGate: Factory Reset](../Fortinet-Firewall/factory-reset.md)
+- [Repository index](../README.md)
