@@ -264,4 +264,6 @@ With 3 console cables, Path B for 20 units drops to roughly 2 hours.
 
 - [Palo Alto Networks Firewall: Factory Reset](../Palo-Alto-Firewall/factory-reset.md)
 - [Cisco 1100 Router: Password Recovery via ROMmon](../Cisco-1100-Router/password-recovery.md)
+- [Cisco 1100 Router: Reset Button Behavior](../Cisco-1100-Router/reset-button-recovery.md)
 - [Cisco Catalyst 1200 Switch: Factory Reset](../Cisco-1200-Switch/factory-reset.md)
+- [Repository index](../README.md)
