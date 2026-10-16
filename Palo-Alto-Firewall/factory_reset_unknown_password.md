@@ -5,7 +5,10 @@ Procedure for resetting a Palo Alto Networks firewall (PA-220, PA-400, PA-800 se
 Written for lab environments where firewalls are reset between semesters.
 
 > [!NOTE]
-> **Verified on:** _Not yet verified. Fill in model, PAN-OS version, and date after the first lab run._
+> **Verified on:** PA-440, PAN-OS 10.1.9-h3, October 2026.
+
+> [!IMPORTANT]
+> On the **PA-440**, maintenance mode is **not** reached by typing `maint` at a text prompt. The unit shows a graphical boot menu where you select `PANOS (maint-sysroot0)`. See [step 5](#5-select-the-maintenance-partition). The `maint` text-prompt method applies to older platforms like the PA-220, kept in the table there for reference.
 
 > [!IMPORTANT]
 > There is **no password recovery** on Palo Alto firewalls. Unlike the Cisco 1100, there is no config register trick that bypasses the startup config and lets you in with the existing configuration intact. Maintenance mode Factory Reset is the only route in without credentials, and it wipes everything.
@@ -29,16 +32,17 @@ Written for lab environments where firewalls are reset between semesters.
   - [2. Identify the COM port](#2-identify-the-com-port)
   - [3. Open a serial session](#3-open-a-serial-session)
   - [4. Power cycle the firewall](#4-power-cycle-the-firewall)
-  - [5. Type maint at the boot prompt](#5-type-maint-at-the-boot-prompt)
+  - [5. Select the maintenance partition](#5-select-the-maintenance-partition)
   - [6. Wait for the maintenance image](#6-wait-for-the-maintenance-image)
   - [7. Continue past the welcome screen](#7-continue-past-the-welcome-screen)
   - [8. Select Factory Reset](#8-select-factory-reset)
   - [9. Confirm the reset](#9-confirm-the-reset)
-  - [10. Wait for the reset and reboot](#10-wait-for-the-reset-and-reboot)
-  - [11. Wait for autocommit](#11-wait-for-autocommit)
-  - [12. Log in with the defaults](#12-log-in-with-the-defaults)
-  - [13. Set the new admin password](#13-set-the-new-admin-password)
-  - [14. Verify](#14-verify)
+  - [10. Reboot from the status screen](#10-reboot-from-the-status-screen)
+  - [11. Exit ZTP mode](#11-exit-ztp-mode)
+  - [12. Wait for autocommit](#12-wait-for-autocommit)
+  - [13. Log in with the defaults](#13-log-in-with-the-defaults)
+  - [14. Set the new admin password](#14-set-the-new-admin-password)
+  - [15. Verify](#15-verify)
 - [Expected End State](#expected-end-state)
 - [Maintenance Menu Reference](#maintenance-menu-reference)
 - [Benign Messages](#benign-messages)
@@ -67,7 +71,7 @@ Console settings:
 | Flow control | `None` |
 
 > [!NOTE]
-> SSH will not work for this procedure. The boot interrupt only happens on the console.
+> SSH will not work for this procedure. The boot menu and maintenance mode are only reachable on the console.
 
 ## Time Estimate
 
@@ -77,12 +81,11 @@ Console settings:
 | Step 6 maintenance image load | 2 to 3 minutes |
 | Steps 7 to 9 | Under 1 minute |
 | Step 10 reset and reboot | 8 to 15 minutes |
-| Step 11 autocommit | 2 to 5 minutes |
-| Steps 12 to 14 | About 2 minutes |
+| Steps 11 to 12 autocommit | 2 to 5 minutes |
+| Steps 13 to 15 | About 2 minutes |
 | **Per firewall total** | **20 to 30 minutes** |
 
-> [!NOTE]
-> These are estimates. Replace with measured times after the first lab run.
+Measured on a PA-440 running 10.1.9-h3.
 
 ---
 
@@ -118,31 +121,29 @@ Click **Open**. Press <kbd>Enter</kbd> once. If the firewall is running, a login
 
 Unplug the power cable, wait 5 seconds, plug it back in.
 
-Keep your eyes on the terminal. The next step has a short window.
+The PA-440 boots through an InsydeH2O BIOS first, then shows a PAN-OS boot menu. Watch the terminal.
 
-### 5. Type maint at the boot prompt
+### 5. Select the maintenance partition
 
-Watch for the bootloader prompt. On PA-220 and similar units it looks like this:
+The firewall shows a PAN-OS boot menu with four entries:
 
 ```
-Welcome to the PanOS Bootloader.
-
-Autoboot to default partition in 5 seconds.
-Enter 'maint' to boot to maint partition.
-Entry:
+PANOS (maint-sysroot0)
+PANOS (maint-sysroot1)
+PANOS (sysroot0)
+PANOS (sysroot1)
 ```
 
-Type `maint` and press <kbd>Enter</kbd>. You have about 5 seconds.
+Arrow to **`PANOS (maint-sysroot0)`** and press <kbd>Enter</kbd>. The `maint-` entries are maintenance mode. `sysroot0` is the active partition, so use that first; if it fails to load, retry with `maint-sysroot1`.
 
-| What you see | What it means | Action |
-| --- | --- | --- |
-| Maintenance image starts loading | `maint` landed | Continue to step 6 |
-| Normal PAN-OS boot continues, login prompt with old hostname | Missed the window | Power cycle, retry step 5 |
-| A `CHOOSE PANOS` or GRUB-style menu | Older PAN-OS or a different platform | Arrow to `PANOS (maint)` and press <kbd>Enter</kbd> |
-| A prompt asking you to press `m` | Older PAN-OS | Press `m` repeatedly until it loads |
+> [!NOTE]
+> This menu appears on its own during boot. You do not type `maint`, and you do not need to press Esc for BIOS boot options to reach it.
 
 > [!TIP]
-> Start typing `maint` as soon as `Entry:` appears. Do not wait to read the whole screen. Click inside the PuTTY window before power cycling so it has keyboard focus.
+> Click inside the PuTTY window first so arrow keys and <kbd>Enter</kbd> reach the firewall.
+
+> [!NOTE]
+> **Older platforms (PA-220 and similar) use a text prompt instead.** They show `Enter 'maint' to boot to maint partition. Entry:` and you type `maint` within about 5 seconds. If you see that prompt rather than the four-entry menu, type `maint` and press <kbd>Enter</kbd>.
 
 ### 6. Wait for the maintenance image
 
@@ -169,42 +170,61 @@ See [Maintenance Menu Reference](#maintenance-menu-reference) for what the other
 
 A confirmation screen appears showing:
 
-- The PAN-OS image that will be used for the reset
+- The PAN-OS image that will be used (for example `panos-10.1.9-h3`)
 - A warning that all logs and configuration will be removed
-- A **Scrub** option
+- A **Scrub** option, with a scrub type selector (`nnsa` / `dod`)
 
-**Leave Scrub unchecked.** Scrub securely overwrites the disk and takes much longer. It is for decommissioning or RMA, not semester resets.
+**Leave Scrub unchecked.** Scrub iteratively overwrites the disk and can take several hours to days. It is for decommissioning or RMA, not semester resets. The scrub type selector below it is irrelevant while Scrub is off.
 
-Arrow down to **Factory Reset** at the bottom of the screen and press <kbd>Enter</kbd>.
+Arrow down to the **Factory Reset** entry below the Scrub section and press <kbd>Enter</kbd>.
 
 > [!IMPORTANT]
 > If the screen shows `No current active image found`, the PAN-OS install is damaged and Factory Reset cannot run. See [Troubleshooting](#troubleshooting).
 
-### 10. Wait for the reset and reboot
+### 10. Reboot from the status screen
 
-Progress displays as a percentage. When it finishes, the firewall reboots into normal PAN-OS on its own.
+The reset runs, then shows:
+
+```
+Factory Reset Status: Success
+```
+
+Below it is a `Reboot` entry, and you may see `Bootstrapping [plugin] into partition "panrepo"`. That line is normal post-reset cleanup.
+
+Arrow to **Reboot** and press <kbd>Enter</kbd>.
 
 > [!WARNING]
 > Do not power cycle during the reset. Interrupting it can damage the PAN-OS install and leave you reimaging the unit.
 
-Boot is complete when the login prompt returns with the **default hostname**:
+### 11. Exit ZTP mode
+
+After the reboot the firewall comes up in Zero Touch Provisioning (ZTP) mode and will **not** accept a normal login until you exit it. You will see:
 
 ```
-PA-220 login:
+Do you want to exit ZTP mode and configure your firewall in standard mode (yes/no)[no]?:
 ```
 
-The model name in place of the old student hostname is your first sign the reset took.
-
-### 11. Wait for autocommit
-
-**The login prompt appearing does not mean the firewall is ready.** PAN-OS runs an autocommit job after boot that loads the default configuration. Until it finishes, `admin` / `admin` may be rejected.
-
-Wait 2 to 5 minutes after the prompt appears before logging in.
+Type `yes` and press <kbd>Enter</kbd>.
 
 > [!IMPORTANT]
-> If `admin` / `admin` is rejected right after boot, **do not assume the reset failed.** This is the most common false alarm in this procedure. Wait and retry before doing anything else.
+> Until you answer this, any `admin` / `admin` you type goes into the ZTP prompt, not a login, and logs as `Login incorrect`. That is not a failed reset.
 
-### 12. Log in with the defaults
+### 12. Wait for autocommit
+
+**The login prompt appearing does not mean the firewall is ready.** PAN-OS runs an autocommit job after boot that loads the default configuration. Until it finishes, `admin` / `admin` is rejected and the console may repeat `Login incorrect` on its own.
+
+Wait 2 to 5 minutes, hands off the keyboard, until a clean login prompt with the **default hostname** settles:
+
+```
+PA-440 login:
+```
+
+The model name in place of the old student hostname is your sign the reset took.
+
+> [!IMPORTANT]
+> Repeated `Login incorrect` right after boot is autocommit still running, **not** a failed reset. This is the single most common false alarm in this procedure. Wait it out before doing anything else.
+
+### 13. Log in with the defaults
 
 | Prompt | Value |
 | --- | --- |
@@ -231,7 +251,7 @@ show jobs all
 
 Look for a job of type `AutoCom` with status `FIN` and result `OK`.
 
-### 13. Set the new admin password
+### 14. Set the new admin password
 
 On **PAN-OS 9.0.4 and later**, the first login forces a password change. It cannot be skipped.
 
@@ -246,7 +266,7 @@ The old password is `admin`. Enter the shared lab password decided before the ba
 > [!NOTE]
 > Record the new password somewhere the next lab admin can find it. Losing it means repeating this entire procedure.
 
-### 14. Verify
+### 15. Verify
 
 ```
 show system info
@@ -256,7 +276,7 @@ Expected results:
 
 | Field | Expected value |
 | --- | --- |
-| `hostname` | Model name, e.g. `PA-220` |
+| `hostname` | Model name, e.g. `PA-440` |
 | `ip-address` | `192.168.1.1` |
 | `netmask` | `255.255.255.0` |
 | `default-gateway` | Empty |
@@ -275,7 +295,7 @@ Accept the self-signed certificate warning and log in with the new lab password.
 
 | Property | Value |
 | --- | --- |
-| Hostname | Model name (e.g. `PA-220`) |
+| Hostname | Model name (e.g. `PA-440`) |
 | Admin credentials | `admin` / your lab password |
 | Management IP | `192.168.1.1 / 24` on MGT |
 | Management access | HTTPS and SSH on MGT |
@@ -313,7 +333,10 @@ Only Factory Reset is needed for a lab reset. The others are listed so you know 
 
 | Message | Meaning |
 | --- | --- |
+| `Login incorrect` repeating right after boot | ZTP prompt not yet answered, or autocommit still running. Answer ZTP with `yes`, then wait. |
 | `admin` / `admin` rejected immediately after boot | Autocommit still running. Wait and retry. |
+| `Bootstrapping [plugin] into partition "panrepo"` | Normal post-reset cleanup on the status screen. |
+| `FIPS-CC Plugin Self-Tests ... passed` during boot | Normal boot self-test. Not an indication the unit is in FIPS-CC mode. |
 | `show chassis-ready` returns `no` | System still initializing. Wait a minute and run it again. |
 | Long pause with no output after selecting Factory Reset | Normal. Progress percentage may update slowly. |
 | Certificate warning at `https://192.168.1.1` | Self-signed certificate regenerated by the reset. Expected. |
@@ -327,11 +350,13 @@ Only Factory Reset is needed for a lab reset. The others are listed so you know 
 | --- | --- | --- |
 | Terminal shows garbage characters | Speed set to 115200 | Change to 9600 |
 | Terminal stays blank | Wrong COM port, or cable in MGT instead of CONSOLE | Verify the port in Device Manager, confirm the cable is in CONSOLE |
-| Normal boot continues, `maint` ignored | Missed the 5 second window, or PuTTY window did not have focus | Click into PuTTY, power cycle, type `maint` the moment `Entry:` appears |
-| Keystrokes do nothing at `Entry:` | Adapter or cable issue on transmit | Confirm you can type at a normal login prompt first. Try another cable. |
+| Boots straight to a login prompt, no boot menu seen | Menu scrolled past, or you were not watching | Power cycle and watch from `Booting from SPI0`. The four-entry menu follows shortly after. |
+| Boot stops at an InsydeH2O BIOS "Front Page" asking for a password | You pressed Esc into BIOS boot options | Do not use BIOS boot options. Those entries are password protected and are a dead end. Reboot and select `PANOS (maint-sysroot0)` from the PAN-OS menu instead. |
+| `Login incorrect` on every `admin` / `admin` right after boot | ZTP prompt not answered yet | Answer the exit-ZTP prompt with `yes`, then wait for autocommit |
+| `maint-sysroot0` fails to load | Active partition is sysroot1 | Reboot and select `PANOS (maint-sysroot1)` |
 | `No current active image found` on the reset screen | PAN-OS install is damaged | Use **Disk Image** in the maintenance menu to reinstall PAN-OS, then run Factory Reset |
 | Firewall drops back into maintenance mode on every boot | Repeated boot failures, PAN-OS damaged | Run **FSCK**, then Factory Reset. If it persists, reinstall via **Disk Image**. |
-| `admin` / `admin` rejected after waiting 10 minutes | Reset did not complete, or the boot was normal and `maint` never landed | Check the hostname at the login prompt. If it is the old hostname, repeat from step 4. |
+| `admin` / `admin` rejected after answering ZTP and waiting 10 minutes | Reset did not complete | Check the hostname at the login prompt. If it is the old hostname, repeat from step 4. |
 | New password rejected | Does not meet complexity rules | Read the error message and adjust |
 | Cannot reach `https://192.168.1.1` | Laptop on the wrong subnet, or cable in a data port | Confirm static IP, confirm cable is in **MGT** |
 
@@ -341,7 +366,7 @@ Only Factory Reset is needed for a lab reset. The others are listed so you know 
 
 This procedure is mostly waiting. With multiple console cables, overlap the units.
 
-1. Test on one unit first to confirm your cable, COM port, the 9600 setting, and the `maint` timing.
+1. Test on one unit first to confirm your cable, COM port, the 9600 setting, and the boot-menu behavior for your model.
 2. **Try known credentials first.** If any unit still has a documented password, reset it with [factory-reset-known-password.md](./factory-reset-known-password.md). It roughly halves the time for that unit.
 3. Record each unit's serial from the chassis label, since you cannot run `show system info` until after the reset.
 4. Decide the lab password before starting. Any unit on 9.0.4 or later will demand one.
